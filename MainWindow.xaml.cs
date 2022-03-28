@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AutoBroswer.Action;
+using AutoBroswer.Util;
 using KAutoHelper;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -27,6 +28,9 @@ namespace AutoBroswer
     /// </summary>
     public partial class MainWindow : Window
     {
+        List<Thread> threads = new List<Thread>();
+        List<IntPtr> windows = new List<IntPtr>();
+        int count = 0;
         public MainWindow()
         {
             InitializeComponent();
@@ -42,81 +46,112 @@ namespace AutoBroswer
             ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.AddArgument("--disable-gpu");
 
-            var driver = new ChromeDriver(chromeOptions);
+            var listToken = FileUtil.GetListTextFromFile("token.txt");
 
-            var windowHandle = IntPtr.Zero;
-            while (true)
+            foreach (var item in listToken)
             {
-
-                var listProcess = AutoControl.FindWindowHandlesFromProcesses(null, "data:, - Google Chrome");
-
-                if (listProcess.Count > 0)
+                Thread new_thread = new Thread(new ThreadStart(() =>
                 {
-                    windowHandle = listProcess[0];
-                }
-                if (windowHandle != IntPtr.Zero)
-                {
-                    break;
-                }
+                    bool checkFoundProcess = false;
+                    //Check process truoc chua doi ten
+                                        
+
+                    //
+
+                    var driver = new ChromeDriver(chromeOptions);
+
+                    var windowHandle = IntPtr.Zero;
+                    while (true)
+                    {
+
+                        var listProcess = AutoControl.FindWindowHandlesFromProcesses(null, "data:, - Google Chrome");
+
+                        if (listProcess.Count > 0)
+                        {
+                            windowHandle = listProcess[0];
+                        }
+                        if (windowHandle != IntPtr.Zero)
+                        {
+                            break;
+                        }
+                    }
+                    driver.Url = "https://h5.topwargame.com/h5game/index.html";
+                    IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+                    string key = "topwar_app_serverInfoToken";
+
+                    while (true)
+                    {
+                        var text = (String)js.ExecuteScript("return localStorage.getItem('" + key + "')");
+                        if (!string.IsNullOrEmpty(text))
+                        {
+                            Console.WriteLine(text);
+                            break;
+                        }
+
+                    }
+                    string value = "\"MTQwMSx3ZWJnYW1lZ2xvYmFsLDlhOTEwOGNlLTA3ZTYtNDFhOS05ZDkyLTk2YzI1MTQwNTM1YSx3c3M6Ly9zZXJ2ZXIta25pZ2h0LXMxMjAwLnJpdmVyZ2FtZS5uZXQvczE0MDEsMTY0ODQ0NzQ0NDkzNiw3MDJkMjNjYWM1MmFkOWUwYjhjZTY2YTY3MTYzYjBjZCwsLGdvb2dsZXBsYXksZXlKdmNHVnVhV1FpT2lJeE1UQXlNREl3TXpBNU1URTBOVFF5TmpFd01EWWlMQ0p1WVcxbElqb2lUbWQxZVdWdUlFaHZZVzVuSWl3aWNHbGpkSFZ5WlNJNkltaDBkSEJ6T2k4dmJHZ3pMbWR2YjJkc1pYVnpaWEpqYjI1MFpXNTBMbU52YlM5aEwwRkJWRmhCU25sMFZFVklUbEZIZURkME0yNU9VamRYV201a1ZtTjZUSGMzWW5FMU0wbzJjMVYyTVhVdFBYTTVOaTFqSWl3aVpXMWhhV3dpT2lKdVlYQmhMbTVuZFhsbGJtaHZZVzVuUUdkdFlXbHNMbU52YlNKOSw2Mzk4MDQ5MzM0NDIsWFNPTExBXzFlOTUxNzVhLTM2MmItNGVkZS05ZjkyLWU2Njg2M2JlNTk2ZCws\"";
+
+                    js.ExecuteScript("localStorage.setItem('" + key + "','" + item + "');");
+
+                    driver.Url = "https://h5.topwargame.com/h5game/index.html";
+
+                    AutoControl.MoveWindow(windowHandle, 0, 0, 1024, 768, true);
+
+                    int waitTime = 2000;
+
+
+                    bool isClicked = false;
+                    while (!isClicked)
+                    {
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
+                    }
+                    AutoControl.SendText(windowHandle, "Top1");
+                    Thread.Sleep(waitTime);
+                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
+                    Thread.Sleep(waitTime);
+
+                BeforeCheckSlot:
+                    //Kiem tra hang cho
+                    var isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/a.png", 4, 1000);
+                    if (!isSlotAvailable)
+                    {
+                        goto BeforeCheckSlot;
+                    }
+                    //
+
+                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
+                    Thread.Sleep(waitTime);
+                    isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
+                    Thread.Sleep(waitTime);
+                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
+                    Thread.Sleep(3000);
+                    while (true)
+                    {
+
+                        ClickAction.ClickByPosition(windowHandle, 514, 461);
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
+                        Thread.Sleep(waitTime);
+                        if (isClicked)
+                        {
+                            break;
+                        }
+                    }
+                    var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
+                    if (foundPoint.HasValue)
+                    {
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
+                        Thread.Sleep(waitTime);
+                        ClickAction.ClickByPosition(windowHandle, 510, 420);
+                        goto BeforeCheckSlot;
+                    }
+                }));
+                threads.Add(new_thread);
+                new_thread.Start();
+                count++;
             }
 
-            driver.Url = "https://h5.topwargame.com/h5game/index.html";
-            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
 
-            string key = "topwar_app_serverInfoToken";
-
-            while (true)
-            {
-                var text = (String)js.ExecuteScript("return localStorage.getItem('" + key + "')");
-                if (!string.IsNullOrEmpty(text))
-                {
-                    Console.WriteLine(text);
-                    break;
-                }
-
-            }
-            string value = "MTQwMSx3ZWJnYW1lZ2xvYmFsLDlhOTEwOGNlLTA3ZTYtNDFhOS05ZDkyLTk2YzI1MTQwNTM1YSx3c3M6Ly9zZXJ2ZXIta25pZ2h0LXMxMjAwLnJpdmVyZ2FtZS5uZXQvczE0MDEsMTY0ODQ0NzQ0NDkzNiw3MDJkMjNjYWM1MmFkOWUwYjhjZTY2YTY3MTYzYjBjZCwsLGdvb2dsZXBsYXksZXlKdmNHVnVhV1FpT2lJeE1UQXlNREl3TXpBNU1URTBOVFF5TmpFd01EWWlMQ0p1WVcxbElqb2lUbWQxZVdWdUlFaHZZVzVuSWl3aWNHbGpkSFZ5WlNJNkltaDBkSEJ6T2k4dmJHZ3pMbWR2YjJkc1pYVnpaWEpqYjI1MFpXNTBMbU52YlM5aEwwRkJWRmhCU25sMFZFVklUbEZIZURkME0yNU9VamRYV201a1ZtTjZUSGMzWW5FMU0wbzJjMVYyTVhVdFBYTTVOaTFqSWl3aVpXMWhhV3dpT2lKdVlYQmhMbTVuZFhsbGJtaHZZVzVuUUdkdFlXbHNMbU52YlNKOSw2Mzk4MDQ5MzM0NDIsWFNPTExBXzFlOTUxNzVhLTM2MmItNGVkZS05ZjkyLWU2Njg2M2JlNTk2ZCws";
-
-            js.ExecuteScript("localStorage.setItem('" + key + "','\"" + value + "\"');");
-
-            driver.Url = "https://h5.topwargame.com/h5game/index.html";
-
-            AutoControl.MoveWindow(windowHandle, 0, 0, 1024, 768, true);
-
-            int waitTime = 2000;
-
-
-            bool isClicked = false;
-            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
-            AutoControl.SendText(windowHandle, "Top1");
-            Thread.Sleep(waitTime);
-            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
-            Thread.Sleep(waitTime);
-            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
-            Thread.Sleep(waitTime);
-            isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
-            Thread.Sleep(waitTime);
-            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
-            Thread.Sleep(3000);
-            while (true)
-            {
-
-                ClickAction.ClickByPosition(windowHandle, 514, 461);
-                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
-                Thread.Sleep(waitTime);
-                if (isClicked)
-                {
-                    break;
-                }
-            }
-            var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
-            if (foundPoint.HasValue)
-            {
-                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
-                Thread.Sleep(waitTime);
-                ClickAction.ClickByPosition(windowHandle, 510, 420);
-
-            }
 
         }
 
@@ -124,7 +159,7 @@ namespace AutoBroswer
         {
 
             var str = ImageScanOpenCV.RecolizeText(ImageScanOpenCV.GetImage("image/1/armyNumber.png"));
-            
+
 
         }
     }

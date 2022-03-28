@@ -16,5 +16,12 @@ namespace AutoBroswer.Util
             var rawText = File.ReadAllText(path);
             return JsonConvert.DeserializeObject<List<T>>(rawText);
         }
+
+        public static List<string> GetListTextFromFile(string path)
+        {
+
+            var rawText = File.ReadAllLines(path).ToList();
+            return rawText;
+        }
     }
 }

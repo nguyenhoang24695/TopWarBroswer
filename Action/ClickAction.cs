@@ -19,7 +19,7 @@ namespace AutoBroswer.Action
             while (true)
             {
                 var captureHandle = (Bitmap)CaptureHelper.CaptureWindow(mainHandle);
-                res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap, 0.95);
+                res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap, 0.80);
                 if (res.HasValue)
                 {
                     AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
