@@ -46,14 +46,14 @@ namespace AutoBroswer.Action
                 res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap);
                 if (res.HasValue)
                 {
-                    AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
+                    //AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
                     return true;
                 }
 
-                res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap);
+                res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap1);
                 if (res.HasValue)
                 {
-                    AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
+                    //AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
                     return false;
                 }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,8 +17,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using AutoBroswer.Action;
+using AutoBroswer.Entity;
 using AutoBroswer.Util;
 using KAutoHelper;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 
@@ -30,6 +33,7 @@ namespace AutoBroswer
     {
         List<Thread> threads = new List<Thread>();
         List<IntPtr> windows = new List<IntPtr>();
+        List<ChromeDriver> chromeDrivers = new List<ChromeDriver>();
         int count = 0;
         public MainWindow()
         {
@@ -48,19 +52,19 @@ namespace AutoBroswer
 
             var listToken = FileUtil.GetListTextFromFile("token.txt");
 
-            foreach (var item in listToken)
+            var s = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText("test.json"));
+
+            foreach (var item in s)
             {
                 Thread new_thread = new Thread(new ThreadStart(() =>
                 {
                     bool checkFoundProcess = false;
-                    //Check process truoc chua doi ten
-                                        
 
-                    //
+                    Thread.Sleep(item.ID * 2000);
 
                     var driver = new ChromeDriver(chromeOptions);
-
                     var windowHandle = IntPtr.Zero;
+
                     while (true)
                     {
 
@@ -69,6 +73,8 @@ namespace AutoBroswer
                         if (listProcess.Count > 0)
                         {
                             windowHandle = listProcess[0];
+                            chromeDrivers.Add(driver);
+                            windows.Add(windowHandle);
                         }
                         if (windowHandle != IntPtr.Zero)
                         {
@@ -92,28 +98,29 @@ namespace AutoBroswer
                     }
                     string value = "\"MTQwMSx3ZWJnYW1lZ2xvYmFsLDlhOTEwOGNlLTA3ZTYtNDFhOS05ZDkyLTk2YzI1MTQwNTM1YSx3c3M6Ly9zZXJ2ZXIta25pZ2h0LXMxMjAwLnJpdmVyZ2FtZS5uZXQvczE0MDEsMTY0ODQ0NzQ0NDkzNiw3MDJkMjNjYWM1MmFkOWUwYjhjZTY2YTY3MTYzYjBjZCwsLGdvb2dsZXBsYXksZXlKdmNHVnVhV1FpT2lJeE1UQXlNREl3TXpBNU1URTBOVFF5TmpFd01EWWlMQ0p1WVcxbElqb2lUbWQxZVdWdUlFaHZZVzVuSWl3aWNHbGpkSFZ5WlNJNkltaDBkSEJ6T2k4dmJHZ3pMbWR2YjJkc1pYVnpaWEpqYjI1MFpXNTBMbU52YlM5aEwwRkJWRmhCU25sMFZFVklUbEZIZURkME0yNU9VamRYV201a1ZtTjZUSGMzWW5FMU0wbzJjMVYyTVhVdFBYTTVOaTFqSWl3aVpXMWhhV3dpT2lKdVlYQmhMbTVuZFhsbGJtaHZZVzVuUUdkdFlXbHNMbU52YlNKOSw2Mzk4MDQ5MzM0NDIsWFNPTExBXzFlOTUxNzVhLTM2MmItNGVkZS05ZjkyLWU2Njg2M2JlNTk2ZCws\"";
 
-                    js.ExecuteScript("localStorage.setItem('" + key + "','" + item + "');");
+                    js.ExecuteScript("localStorage.setItem('" + key + "','" + item.StringToken + "');");
 
                     driver.Url = "https://h5.topwargame.com/h5game/index.html";
 
-                    AutoControl.MoveWindow(windowHandle, 0, 0, 1024, 768, true);
+                    AutoControl.MoveWindow(windowHandle, item.ID * 10, item.ID * 10, 1024, 768, true);
 
                     int waitTime = 2000;
-
+                    var childHandle = KAutoHelper.AutoControl.GetChildHandle(windowHandle)[0];
 
                     bool isClicked = false;
                     while (!isClicked)
                     {
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
                     }
-                    AutoControl.SendText(windowHandle, "Top1");
+                    AutoControl.SendText(windowHandle, item.Name);
+
                     Thread.Sleep(waitTime);
                     isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
                     Thread.Sleep(waitTime);
 
                 BeforeCheckSlot:
                     //Kiem tra hang cho
-                    var isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/a.png", 4, 1000);
+                    var isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
                     if (!isSlotAvailable)
                     {
                         goto BeforeCheckSlot;
@@ -145,6 +152,11 @@ namespace AutoBroswer
                         ClickAction.ClickByPosition(windowHandle, 510, 420);
                         goto BeforeCheckSlot;
                     }
+                    else
+                    {
+                        KAutoHelper.FindWindow.GetWindowThreadProcessId(windowHandle, out int pId);
+                        Process.GetProcessById(pId).Kill();
+                    }
                 }));
                 threads.Add(new_thread);
                 new_thread.Start();
@@ -158,9 +170,23 @@ namespace AutoBroswer
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
 
+            var s = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText("test.json"));
+            File.WriteAllText("test.json", JsonConvert.SerializeObject(s, Formatting.Indented));
+
             var str = ImageScanOpenCV.RecolizeText(ImageScanOpenCV.GetImage("image/1/armyNumber.png"));
 
 
+        }
+
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            if (windows.Count > 0)
+            {
+                foreach (var window in windows)
+                {
+                    ClickAction.ClickByPosition(window, int.Parse(toa_do_x.Text), int.Parse(toa_do_y.Text));
+                }
+            }
         }
     }
 }
