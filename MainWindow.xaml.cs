@@ -120,7 +120,24 @@ namespace AutoBroswer
 
                 BeforeCheckSlot:
                     //Kiem tra hang cho
-                    var isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
+                    bool isSlotAvailable = false;
+                    int rl_slot = 0;
+                    this.Dispatcher.Invoke(new System.Action(() =>
+                    {
+                        rl_slot = int.Parse(Queue_Textbox.Text);
+                    }));
+                    switch (rl_slot)
+                    {
+                        case 1:
+                            isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
+                            break;
+                        case 4:
+                            isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                            break;
+                        default:
+                            break;
+                    }
+
                     if (!isSlotAvailable)
                     {
                         goto BeforeCheckSlot;
@@ -129,7 +146,21 @@ namespace AutoBroswer
 
                     isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
                     Thread.Sleep(waitTime);
-                    isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
+
+                    //loai rally
+                    string content_rl = string.Empty;
+                    this.Dispatcher.Invoke(new System.Action(() =>
+                    {
+                        content_rl = ((Button)sender).Content.ToString();
+                    }));
+                    if (content_rl == "DF_5")
+                    {
+                        isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/df_checked.png", "image/1/df_unchecked.png", 10, 1000);
+                    }
+                    else
+                    {
+                        isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
+                    }
                     Thread.Sleep(waitTime);
                     isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
                     Thread.Sleep(3000);
@@ -137,7 +168,16 @@ namespace AutoBroswer
                     {
 
                         ClickAction.ClickByPosition(windowHandle, 514, 461);
-                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
+                        if (content_rl == "DF_5")
+                        {
+
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn.png", 2, 1000);
+                        }
+                        else
+                        {
+
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
+                        }
                         Thread.Sleep(waitTime);
                         if (isClicked)
                         {
@@ -147,9 +187,26 @@ namespace AutoBroswer
                     var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
                     if (foundPoint.HasValue)
                     {
-                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
+                        if (content_rl == "DF_5")
+                        {
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_item.png", 10, 1000);
+
+                        }
+                        else
+                        {
+
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
+                        }
                         Thread.Sleep(waitTime);
                         ClickAction.ClickByPosition(windowHandle, 510, 420);
+
+                        if (content_rl == "DF_5")
+                        {
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_ok.png", 10, 1000);
+
+                        }
                         goto BeforeCheckSlot;
                     }
                     else
