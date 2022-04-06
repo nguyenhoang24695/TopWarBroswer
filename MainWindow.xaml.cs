@@ -149,9 +149,11 @@ namespace AutoBroswer
 
                     //loai rally
                     string content_rl = string.Empty;
+                    string team_rl = string.Empty;
                     this.Dispatcher.Invoke(new System.Action(() =>
                     {
                         content_rl = ((Button)sender).Content.ToString();
+                        team_rl = Team_Textbox.Text;
                     }));
                     if (content_rl == "DF_5")
                     {
@@ -187,18 +189,24 @@ namespace AutoBroswer
                     var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
                     if (foundPoint.HasValue)
                     {
+                        switch (int.Parse(team_rl))
+                        {
+                            case 1:
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
+                                break;
+                            default:
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
+                                break;
+
+
+                        }
                         if (content_rl == "DF_5")
                         {
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
                             isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);
                             isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_item.png", 10, 1000);
 
                         }
-                        else
-                        {
 
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
-                        }
                         Thread.Sleep(waitTime);
                         ClickAction.ClickByPosition(windowHandle, 510, 420);
 
