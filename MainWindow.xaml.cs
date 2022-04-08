@@ -20,6 +20,7 @@ using AutoBroswer.Action;
 using AutoBroswer.Entity;
 using AutoBroswer.Util;
 using KAutoHelper;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -52,7 +53,17 @@ namespace AutoBroswer
 
             var listToken = FileUtil.GetListTextFromFile("token.txt");
 
-            var s = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText("test.json"));
+            var fbd = new OpenFileDialog();
+            fbd.InitialDirectory = Environment.CurrentDirectory;
+            var result = fbd.ShowDialog();
+
+            var s = new List<Token>();
+            if (result.HasValue && result.Value)
+            {
+                s = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText(fbd.FileName));
+
+            }
+
 
             foreach (var item in s)
             {
@@ -253,5 +264,7 @@ namespace AutoBroswer
                 }
             }
         }
+
+
     }
 }
