@@ -142,6 +142,13 @@ namespace AutoBroswer
                         case 1:
                             isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
                             break;
+                        case 2:
+                            isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
+                                "image/1/rally_slot/2/0.png",
+                                "image/1/rally_slot/2/1.png"
+                                }.ToArray(),
+                                "image/1/rally_slot/1/f.png", 2, 1000);
+                            break;
                         case 4:
                             isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
                             break;
@@ -202,6 +209,9 @@ namespace AutoBroswer
                     {
                         switch (int.Parse(team_rl))
                         {
+                            case 0:
+                                ClickAction.ClickByPosition(windowHandle, 512, 726);
+                                break;
                             case 1:
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
                                 break;
@@ -211,6 +221,7 @@ namespace AutoBroswer
 
 
                         }
+                        Thread.Sleep(waitTime);
                         if (content_rl == "DF_5")
                         {
                             isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);

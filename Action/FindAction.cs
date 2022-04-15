@@ -64,5 +64,43 @@ namespace AutoBroswer.Action
                 Thread.Sleep(wait);
             }
         }
+        internal static bool FindByImageListNorImage(IntPtr mainHandle, string[] subBmPath, string subBmPath1, int count, int wait)
+        {
+            int currentCount = 0;
+            var res = new System.Drawing.Point?();
+            List<Bitmap> subBitmaps = new List<Bitmap>();
+            foreach (var sB in subBmPath)
+            {
+                Bitmap subBitMap = ImageScanOpenCV.GetImage(sB);
+                subBitmaps.Add(subBitMap);
+            }
+            var subBitMap1 = ImageScanOpenCV.GetImage(subBmPath1);
+            while (true)
+            {
+                var captureHandle = (Bitmap)CaptureHelper.CaptureWindow(mainHandle);
+                foreach (var sBm in subBitmaps)
+                {
+                    res = ImageScanOpenCV.FindOutPoint(captureHandle, sBm);
+                    if (res.HasValue)
+                    {
+                        //AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
+                        return true;
+                    }
+                }
+
+                res = ImageScanOpenCV.FindOutPoint(captureHandle, subBitMap1);
+                if (res.HasValue)
+                {
+                    //AutoControl.SendClickOnPosition(mainHandle, res.Value.X, res.Value.Y);
+                    return false;
+                }
+
+                if (++currentCount == count)
+                {
+                    return false;
+                }
+                Thread.Sleep(wait);
+            }
+        }
     }
 }
