@@ -11,17 +11,32 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+
         <DockPanel Grid.Column="0" LastChildFill="True">
-            <Button DockPanel.Dock="Top" x:Name="OpenFile_Button" Content="Chosse File" Click="OpenFile_Button_Click"></Button>
-            <Button DockPanel.Dock="Top" Content="Hammer Rally" HorizontalAlignment="Left" Click="Button_Click"/>
-            <Button DockPanel.Dock="Top" Content="Recolize" HorizontalAlignment="Left" Click="Button_Click_1"/>
-            <Button DockPanel.Dock="Top" Content="Click" HorizontalAlignment="Left" Click="Button_Click_2"/>
-            <TextBox DockPanel.Dock="Top" x:Name="toa_do_x" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="49"/>
-            <TextBox DockPanel.Dock="Top" x:Name="toa_do_y" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="51"/>
-            <Button DockPanel.Dock="Top" Content="DF_5" HorizontalAlignment="Left" Click="Button_Click"/>
-            <Button DockPanel.Dock="Top" Content="Hide Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
-            <Button DockPanel.Dock="Top" Content="Show Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
-            <Button DockPanel.Dock="Top" Content="Stop Process" HorizontalAlignment="Left" Click="Button_Click_5"></Button>
+            <Grid DockPanel.Dock="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <Button  x:Name="OpenFile_Button" HorizontalAlignment="Left" Content="Chosse File" Click="OpenFile_Button_Click"></Button>
+                    <Button  Content="Recolize" HorizontalAlignment="Left" Click="Button_Click_1"/>
+                    <Button  Content="Click" HorizontalAlignment="Left" Click="Button_Click_2"/>
+                    <TextBox  x:Name="toa_do_x" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="49"/>
+                    <TextBox  x:Name="toa_do_y" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="51"/>
+                    <Button  Content="Hide Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
+                    <Button  Content="Show Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
+                    <Button  Content="Stop Process" HorizontalAlignment="Left" Click="Button_Click_5"></Button>
+                    <Button  Content="Open First" HorizontalAlignment="Left" Click="Button_Click_6"></Button>
+                </StackPanel>
+                <StackPanel Grid.Column="1">
+                    <Button  Content="Hammer Rally" HorizontalAlignment="Left" Click="Button_Click"/>
+                    <Button  Content="DF_5" HorizontalAlignment="Left" Click="Button_Click"/>
+                    <Button  Content="SOS" HorizontalAlignment="Left" Click="Button_Click"/>
+                    
+                </StackPanel>
+            </Grid>
             <GroupBox>
                 <GroupBox.Header>
                     Log

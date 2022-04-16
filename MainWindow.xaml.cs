@@ -52,13 +52,13 @@ namespace AutoBroswer
             //processStartInfo.Arguments = "--profile-directory=\"Profile 1\"";
             //Process.Start(processStartInfo);
 
-            ChromeOptions chromeOptions = new ChromeOptions();
-            chromeOptions.AddArgument("--disable-gpu");
 
             Thread new_thread = new Thread(new ThreadStart(() =>
             {
                 try
                 {
+                    ChromeOptions chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArgument("--disable-gpu");
                     int totalToken = currentListToken.Count;
                     int currentCount = 0;
                     ConcurrentQueue<Token> tokenBag = new ConcurrentQueue<Token>(currentListToken);
@@ -126,6 +126,15 @@ namespace AutoBroswer
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
                         Thread.Sleep(waitTime);
 
+                        //loai rally
+                        string content_rl = string.Empty;
+                        string team_rl = item.Slot.ToString();
+                        this.Dispatcher.Invoke(new System.Action(() =>
+                        {
+                            content_rl = ((Button)sender).Content.ToString();
+                            //team_rl = Team_Textbox.Text;
+                        }));
+
                     BeforeCheckSlot:
                         //Kiem tra hang cho
                         bool isSlotAvailable = false;
@@ -156,25 +165,31 @@ namespace AutoBroswer
 
                         if (!isSlotAvailable)
                         {
-                            WriteLog("Rally full, dang nhap token tiep theo");
-                            tokenBag.Enqueue(item);
-                            continue;
-                            //goto BeforeCheckSlot;
+                            if (content_rl == "Hammer Rally")
+                            {
+                                WriteLog("Rally full, dang nhap token tiep theo");
+                                tokenBag.Enqueue(item);
+                                continue;
+                            }
+                            goto BeforeCheckSlot;
                         }
                         //
+
+                        if (content_rl == "SOS")
+                        {
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/bag.png", 10, 1000);
+                            Thread.Sleep(waitTime);
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/letterSoS.png", 10, 1000);
+                            Thread.Sleep(waitTime);
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/use_btn.png", 10, 1000);
+                            goto ClickAI;
+
+                        }
 
                         WriteLog(String.Format("Find: {0}", "image/1/search_btn.png"));
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
                         Thread.Sleep(waitTime);
 
-                        //loai rally
-                        string content_rl = string.Empty;
-                        string team_rl = item.Slot.ToString();
-                        this.Dispatcher.Invoke(new System.Action(() =>
-                            {
-                                content_rl = ((Button)sender).Content.ToString();
-                                //team_rl = Team_Textbox.Text;
-                            }));
                         if (content_rl == "DF_5")
                         {
                             WriteLog(String.Format("Find: {0}", "image/1/df_checked.png"));
@@ -188,6 +203,8 @@ namespace AutoBroswer
                         Thread.Sleep(waitTime);
                         WriteLog(String.Format("Find: {0}", "image/1/rally_search.png"));
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
+
+                    ClickAI:
                         Thread.Sleep(3000);
                         while (true)
                         {
@@ -198,6 +215,12 @@ namespace AutoBroswer
 
                                 WriteLog(String.Format("Find: {0}", "image/1/rally_5_btn.png"));
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn.png", 2, 1000);
+                            }
+                            else if (content_rl == "SOS")
+                            {
+
+                                WriteLog(String.Format("Find: {0}", "image/1/rally_5_btn.png"));
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn1.png", 2, 1000);
                             }
                             else
                             {
@@ -382,6 +405,69 @@ namespace AutoBroswer
                 process.StartInfo.CreateNoWindow = true;
                 process.Start();
             }
+        }
+
+        private void Button_Click_6(object sender, RoutedEventArgs e)
+        {
+            ChromeOptions chromeOptions = new ChromeOptions();
+            chromeOptions.AddArgument("--disable-gpu");
+            int totalToken = currentListToken.Count;
+            int currentCount = 0;
+            ConcurrentQueue<Token> tokenBag = new ConcurrentQueue<Token>(currentListToken);
+
+        Open_Broser_Block:
+            WriteLog("Tìm trình duyệt");
+            var driver = new ChromeDriver(chromeOptions);
+            var windowHandle = IntPtr.Zero;
+
+            WriteLog("Tìm windowProcess");
+            while (true)
+            {
+
+                var listProcess = AutoControl.FindWindowHandlesFromProcesses(null, "data:, - Google Chrome");
+
+                if (listProcess.Count > 0)
+                {
+                    windowHandle = listProcess[0];
+                    chromeDrivers.Add(driver);
+                    windows.Add(windowHandle);
+                }
+                if (windowHandle != IntPtr.Zero)
+                {
+                    break;
+                }
+            }
+            AutoControl.MoveWindow(windowHandle, 10, 10, 1024, 768, true);
+            WriteLog("Vào game");
+            driver.Url = "https://h5.topwargame.com/h5game/index.html";
+            IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+
+            string key = "topwar_app_serverInfoToken";
+            while (true)
+            {
+                var text = (String)js.ExecuteScript("return localStorage.getItem('" + key + "')");
+                if (!string.IsNullOrEmpty(text))
+                {
+                    Console.WriteLine(text);
+                    break;
+                }
+
+            }
+
+            var item = currentListToken[0];
+
+            WriteLog("SetTokenRunning");
+            SetTokenRunning(item);
+            js.ExecuteScript("localStorage.setItem('" + key + "','" + item.StringToken + "');");
+
+            driver.Url = "https://h5.topwargame.com/h5game/index.html";
+
+            bool isClicked = false;
+            while (!isClicked)
+            {
+                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
+            }
+            AutoControl.SendText(windowHandle, item.Name);
         }
     }
 }
