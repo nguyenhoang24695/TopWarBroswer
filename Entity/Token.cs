@@ -10,6 +10,9 @@ namespace AutoBroswer.Entity
     {
         public int ID { get; set; }
         public string Name { get; set; }
+        public int TotalRally { get; set; }
+        public int Slot { get; set; }
+        public bool IsRunning { get; set; }
         public string StringToken { get; set; }
     }
 }

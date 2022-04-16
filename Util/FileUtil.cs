@@ -23,5 +23,10 @@ namespace AutoBroswer.Util
             var rawText = File.ReadAllLines(path).ToList();
             return rawText;
         }
+
+        public static void WriteJsonToFile<T>(T tObject, string path)
+        {
+            File.WriteAllText(path, JsonConvert.SerializeObject(tObject, Formatting.Indented));
+        }
     }
 }

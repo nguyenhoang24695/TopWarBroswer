@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -35,7 +37,9 @@ namespace AutoBroswer
         List<Thread> threads = new List<Thread>();
         List<IntPtr> windows = new List<IntPtr>();
         List<ChromeDriver> chromeDrivers = new List<ChromeDriver>();
+        List<Token> currentListToken = new List<Token>();
         int count = 0;
+        string currentPath = string.Empty;
         public MainWindow()
         {
             InitializeComponent();
@@ -51,31 +55,20 @@ namespace AutoBroswer
             ChromeOptions chromeOptions = new ChromeOptions();
             chromeOptions.AddArgument("--disable-gpu");
 
-            var listToken = FileUtil.GetListTextFromFile("token.txt");
-
-            var fbd = new OpenFileDialog();
-            fbd.InitialDirectory = Environment.CurrentDirectory;
-            var result = fbd.ShowDialog();
-
-            var s = new List<Token>();
-            if (result.HasValue && result.Value)
+            Thread new_thread = new Thread(new ThreadStart(() =>
             {
-                s = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText(fbd.FileName));
-
-            }
-
-
-            foreach (var item in s)
-            {
-                Thread new_thread = new Thread(new ThreadStart(() =>
+                try
                 {
-                    bool checkFoundProcess = false;
+                    int totalToken = currentListToken.Count;
+                    int currentCount = 0;
+                    ConcurrentQueue<Token> tokenBag = new ConcurrentQueue<Token>(currentListToken);
 
-                    Thread.Sleep(item.ID * 2000);
-
+                Open_Broser_Block:
+                    WriteLog("Tìm trình duyệt");
                     var driver = new ChromeDriver(chromeOptions);
                     var windowHandle = IntPtr.Zero;
 
+                    WriteLog("Tìm windowProcess");
                     while (true)
                     {
 
@@ -92,6 +85,8 @@ namespace AutoBroswer
                             break;
                         }
                     }
+                    AutoControl.MoveWindow(windowHandle, 10, 10, 1024, 768, true);
+                    WriteLog("Vào game");
                     driver.Url = "https://h5.topwargame.com/h5game/index.html";
                     IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
 
@@ -107,151 +102,201 @@ namespace AutoBroswer
                         }
 
                     }
-                    string value = "\"MTQwMSx3ZWJnYW1lZ2xvYmFsLDlhOTEwOGNlLTA3ZTYtNDFhOS05ZDkyLTk2YzI1MTQwNTM1YSx3c3M6Ly9zZXJ2ZXIta25pZ2h0LXMxMjAwLnJpdmVyZ2FtZS5uZXQvczE0MDEsMTY0ODQ0NzQ0NDkzNiw3MDJkMjNjYWM1MmFkOWUwYjhjZTY2YTY3MTYzYjBjZCwsLGdvb2dsZXBsYXksZXlKdmNHVnVhV1FpT2lJeE1UQXlNREl3TXpBNU1URTBOVFF5TmpFd01EWWlMQ0p1WVcxbElqb2lUbWQxZVdWdUlFaHZZVzVuSWl3aWNHbGpkSFZ5WlNJNkltaDBkSEJ6T2k4dmJHZ3pMbWR2YjJkc1pYVnpaWEpqYjI1MFpXNTBMbU52YlM5aEwwRkJWRmhCU25sMFZFVklUbEZIZURkME0yNU9VamRYV201a1ZtTjZUSGMzWW5FMU0wbzJjMVYyTVhVdFBYTTVOaTFqSWl3aVpXMWhhV3dpT2lKdVlYQmhMbTVuZFhsbGJtaHZZVzVuUUdkdFlXbHNMbU52YlNKOSw2Mzk4MDQ5MzM0NDIsWFNPTExBXzFlOTUxNzVhLTM2MmItNGVkZS05ZjkyLWU2Njg2M2JlNTk2ZCws\"";
-
-                    js.ExecuteScript("localStorage.setItem('" + key + "','" + item.StringToken + "');");
-
-                    driver.Url = "https://h5.topwargame.com/h5game/index.html";
-
-                    AutoControl.MoveWindow(windowHandle, item.ID * 10, item.ID * 10, 1024, 768, true);
-
-                    int waitTime = 2000;
-                    var childHandle = KAutoHelper.AutoControl.GetChildHandle(windowHandle)[0];
-
-                    bool isClicked = false;
-                    while (!isClicked)
+                Start_Job_Block:
+                    while (tokenBag.Count > 0)
                     {
-                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
-                    }
-                    AutoControl.SendText(windowHandle, item.Name);
+                        tokenBag.TryDequeue(out var item);
+                        WriteLog("SetTokenRunning");
+                        SetTokenRunning(item);
+                        js.ExecuteScript("localStorage.setItem('" + key + "','" + item.StringToken + "');");
 
-                    Thread.Sleep(waitTime);
-                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
-                    Thread.Sleep(waitTime);
+                        driver.Url = "https://h5.topwargame.com/h5game/index.html";
 
-                BeforeCheckSlot:
-                    //Kiem tra hang cho
-                    bool isSlotAvailable = false;
-                    int rl_slot = 0;
-                    this.Dispatcher.Invoke(new System.Action(() =>
-                    {
-                        rl_slot = int.Parse(Queue_Textbox.Text);
-                    }));
-                    switch (rl_slot)
-                    {
-                        case 1:
-                            isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
-                            break;
-                        case 2:
-                            isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
+                        int waitTime = int.Parse(ConfigurationManager.AppSettings["waitTime"].ToString());
+                        var childHandle = KAutoHelper.AutoControl.GetChildHandle(windowHandle)[0];
+
+                        bool isClicked = false;
+                        while (!isClicked)
+                        {
+                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
+                        }
+                        AutoControl.SendText(windowHandle, item.Name);
+
+                        Thread.Sleep(waitTime);
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/world_map.png", 10, 1000);
+                        Thread.Sleep(waitTime);
+
+                    BeforeCheckSlot:
+                        //Kiem tra hang cho
+                        bool isSlotAvailable = false;
+                        WriteLog("Kiem tra rally trong");
+                        int rl_slot = item.TotalRally;
+                        //this.Dispatcher.Invoke(new System.Action(() =>
+                        //    {
+                        //        rl_slot = int.Parse(Queue_Textbox.Text);
+                        //    }));
+                        switch (rl_slot)
+                        {
+                            case 1:
+                                isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/1/a.png", "image/1/rally_slot/1/f.png", 4, 1000);
+                                break;
+                            case 2:
+                                isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
                                 "image/1/rally_slot/2/0.png",
                                 "image/1/rally_slot/2/1.png"
-                                }.ToArray(),
-                                "image/1/rally_slot/1/f.png", 2, 1000);
-                            break;
-                        case 4:
-                            isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
-                            break;
-                        default:
-                            break;
-                    }
+                            }.ToArray(),
+                                        "image/1/rally_slot/1/f.png", 2, 1000);
+                                break;
+                            case 4:
+                                isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                                break;
+                            default:
+                                break;
+                        }
 
-                    if (!isSlotAvailable)
-                    {
-                        goto BeforeCheckSlot;
-                    }
-                    //
+                        if (!isSlotAvailable)
+                        {
+                            WriteLog("Rally full, dang nhap token tiep theo");
+                            tokenBag.Enqueue(item);
+                            continue;
+                            //goto BeforeCheckSlot;
+                        }
+                        //
 
-                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
-                    Thread.Sleep(waitTime);
+                        WriteLog(String.Format("Find: {0}", "image/1/search_btn.png"));
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
+                        Thread.Sleep(waitTime);
 
-                    //loai rally
-                    string content_rl = string.Empty;
-                    string team_rl = string.Empty;
-                    this.Dispatcher.Invoke(new System.Action(() =>
-                    {
-                        content_rl = ((Button)sender).Content.ToString();
-                        team_rl = Team_Textbox.Text;
-                    }));
-                    if (content_rl == "DF_5")
-                    {
-                        isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/df_checked.png", "image/1/df_unchecked.png", 10, 1000);
-                    }
-                    else
-                    {
-                        isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
-                    }
-                    Thread.Sleep(waitTime);
-                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
-                    Thread.Sleep(3000);
-                    while (true)
-                    {
-
-                        ClickAction.ClickByPosition(windowHandle, 514, 461);
+                        //loai rally
+                        string content_rl = string.Empty;
+                        string team_rl = item.Slot.ToString();
+                        this.Dispatcher.Invoke(new System.Action(() =>
+                            {
+                                content_rl = ((Button)sender).Content.ToString();
+                                //team_rl = Team_Textbox.Text;
+                            }));
                         if (content_rl == "DF_5")
                         {
-
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn.png", 2, 1000);
+                            WriteLog(String.Format("Find: {0}", "image/1/df_checked.png"));
+                            isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/df_checked.png", "image/1/df_unchecked.png", 10, 1000);
                         }
                         else
                         {
-
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
+                            WriteLog(String.Format("Find: {0}", "image/1/rally_checked.png"));
+                            isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
                         }
                         Thread.Sleep(waitTime);
-                        if (isClicked)
+                        WriteLog(String.Format("Find: {0}", "image/1/rally_search.png"));
+                        isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
+                        Thread.Sleep(3000);
+                        while (true)
                         {
-                            break;
+
+                            ClickAction.ClickByPosition(windowHandle, 514, 461);
+                            if (content_rl == "DF_5")
+                            {
+
+                                WriteLog(String.Format("Find: {0}", "image/1/rally_5_btn.png"));
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn.png", 2, 1000);
+                            }
+                            else
+                            {
+
+                                WriteLog(String.Format("Find: {0}", "image/1/rally_10_btn.png"));
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
+                            }
+                            Thread.Sleep(waitTime);
+                            if (isClicked)
+                            {
+                                break;
+                            }
+                        }
+                        WriteLog(String.Format("Find: {0}", "image/1/save_infomation_btn.png"));
+                        var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
+                        if (foundPoint.HasValue)
+                        {
+                            switch (int.Parse(team_rl))
+                            {
+                                case 0:
+                                    ClickAction.ClickByPosition(windowHandle, 512, 726);
+                                    break;
+                                case 1:
+                                    WriteLog(String.Format("Find: {0}", "image/1/team_1.png"));
+                                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
+                                    break;
+                                default:
+                                    WriteLog(String.Format("Find: {0}", "image/1/team_quick.png"));
+                                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
+                                    break;
+
+
+                            }
+                            Thread.Sleep(waitTime);
+                            if (content_rl == "DF_5")
+                            {
+                                WriteLog(String.Format("Find: {0}", "DF_5"));
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_item.png", 10, 1000);
+
+                            }
+
+                            Thread.Sleep(waitTime);
+                            ClickAction.ClickByPosition(windowHandle, 510, 420);
+
+                            if (content_rl == "DF_5")
+                            {
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_ok.png", 10, 1000);
+
+                            }
+                            WriteLog(String.Format("Find: {0}", "Completed Rally"));
+                            goto BeforeCheckSlot;
+                        }
+                        else
+                        {
+                            if (++currentCount == totalToken)
+                            {
+                                break;
+                            }
                         }
                     }
-                    var foundPoint = FindAction.FindByImage(windowHandle, "image/1/save_infomation_btn.png", 10, 1000);
-                    if (foundPoint.HasValue)
+                    KAutoHelper.FindWindow.GetWindowThreadProcessId(windowHandle, out int pId);
+                    Process.GetProcessById(pId).Kill();
+                    WriteLog("Finished");
+                }
+                catch (Exception ex)
+                {
+                    WriteLog(ex.Message);
+                }
+            }));
+            new_thread.Start();
+        }
+
+        private void SetTokenRunning(Token item)
+        {
+            this.Dispatcher.Invoke(new System.Action(() =>
+            {
+
+                foreach (var item1 in Token_DataGrid.Items)
+                {
+                    try
                     {
-                        switch (int.Parse(team_rl))
+
+                        if (((Token)item1).Name == item.Name)
                         {
-                            case 0:
-                                ClickAction.ClickByPosition(windowHandle, 512, 726);
-                                break;
-                            case 1:
-                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
-                                break;
-                            default:
-                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_quick.png", 10, 1000);
-                                break;
-
-
+                            ((Token)item1).IsRunning = true;
                         }
-                        Thread.Sleep(waitTime);
-                        if (content_rl == "DF_5")
+                        else
                         {
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_item.png", 10, 1000);
-
+                            ((Token)item1).IsRunning = false;
                         }
-
-                        Thread.Sleep(waitTime);
-                        ClickAction.ClickByPosition(windowHandle, 510, 420);
-
-                        if (content_rl == "DF_5")
-                        {
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_ok.png", 10, 1000);
-
-                        }
-                        goto BeforeCheckSlot;
                     }
-                    else
+                    catch (Exception e)
                     {
-                        KAutoHelper.FindWindow.GetWindowThreadProcessId(windowHandle, out int pId);
-                        Process.GetProcessById(pId).Kill();
+
                     }
-                }));
-                threads.Add(new_thread);
-                new_thread.Start();
-                count++;
-            }
-
-
-
+                }
+                Token_DataGrid.Items.Refresh();
+            }));
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
@@ -276,6 +321,67 @@ namespace AutoBroswer
             }
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Token_DataGrid.ItemsSource = new List<Token>();
+        }
 
+        private void OpenFile_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var fbd = new OpenFileDialog();
+            fbd.InitialDirectory = Environment.CurrentDirectory;
+            fbd.Filter = "Json files (*.json)|*.json";
+            var result = fbd.ShowDialog();
+
+            if (result.HasValue && result.Value)
+            {
+                currentPath = fbd.FileName;
+                currentListToken = JsonConvert.DeserializeObject<List<Token>>(File.ReadAllText(fbd.FileName));
+                Token_DataGrid.ItemsSource = null;
+                Token_DataGrid.ItemsSource = currentListToken;
+                WriteLog(string.Format("Open: {0}", currentPath));
+            }
+        }
+
+        private void Button_Click_3(object sender, RoutedEventArgs e)
+        {
+            currentListToken = (List<Token>)Token_DataGrid.ItemsSource;
+            FileUtil.WriteJsonToFile<List<Token>>(currentListToken, currentPath);
+            WriteLog(string.Format("Save into: {0}", currentPath));
+        }
+
+        private void WriteLog(string textLog)
+        {
+            this.Dispatcher.Invoke(new System.Action(() =>
+                        {
+                            Log_RichTextBox.AppendText(textLog);
+                            Log_RichTextBox.AppendText("\r");
+                        }));
+        }
+
+        private void Button_Click_4(object sender, RoutedEventArgs e)
+        {
+            var content = ((Button)sender).Content.ToString();
+            if (content == "Hide Window")
+            {
+                AutoControl.MoveWindow(windows[0], -1000, -1000, 1024, 768, true);
+            }
+            else
+            {
+                AutoControl.MoveWindow(windows[0], 10, 10, 1024, 768, true);
+            }
+        }
+
+        private void Button_Click_5(object sender, RoutedEventArgs e)
+        {
+            using (Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.FileName = System.IO.Path.Combine(Environment.SystemDirectory, "cmd.exe");
+                process.StartInfo.Arguments = "/C taskkill /IM \"chromedriver.exe\"";
+                process.StartInfo.CreateNoWindow = true;
+                process.Start();
+            }
+        }
     }
 }

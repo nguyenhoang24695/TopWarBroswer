@@ -5,16 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AutoBroswer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
     <Grid>
-        <Button Content="TestOpenApp" HorizontalAlignment="Left" Margin="25,28,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
-        <Button Content="Recolize" HorizontalAlignment="Left" Margin="25,71,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_1"/>
-        <Button Content="Click" HorizontalAlignment="Left" Margin="25,107,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click_2"/>
-        <TextBox x:Name="toa_do_x" HorizontalAlignment="Left" Height="23" Margin="133,107,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="49"/>
-        <TextBox x:Name="toa_do_y" HorizontalAlignment="Left" Height="23" Margin="204,108,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="51"/>
-        <Button Content="DF_5" HorizontalAlignment="Left" Margin="133,28,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
-        <TextBox x:Name="Queue_Textbox" HorizontalAlignment="Left" Margin="241,28,0,0" TextWrapping="Wrap" Text="4" VerticalAlignment="Top" Width="120"/>
-        <TextBox x:Name="Team_Textbox" HorizontalAlignment="Left" Margin="380,28,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="120"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Column="0" LastChildFill="True">
+            <Button DockPanel.Dock="Top" x:Name="OpenFile_Button" Content="Chosse File" Click="OpenFile_Button_Click"></Button>
+            <Button DockPanel.Dock="Top" Content="Hammer Rally" HorizontalAlignment="Left" Click="Button_Click"/>
+            <Button DockPanel.Dock="Top" Content="Recolize" HorizontalAlignment="Left" Click="Button_Click_1"/>
+            <Button DockPanel.Dock="Top" Content="Click" HorizontalAlignment="Left" Click="Button_Click_2"/>
+            <TextBox DockPanel.Dock="Top" x:Name="toa_do_x" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="49"/>
+            <TextBox DockPanel.Dock="Top" x:Name="toa_do_y" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="51"/>
+            <Button DockPanel.Dock="Top" Content="DF_5" HorizontalAlignment="Left" Click="Button_Click"/>
+            <Button DockPanel.Dock="Top" Content="Hide Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
+            <Button DockPanel.Dock="Top" Content="Show Window" HorizontalAlignment="Left" Click="Button_Click_4"></Button>
+            <Button DockPanel.Dock="Top" Content="Stop Process" HorizontalAlignment="Left" Click="Button_Click_5"></Button>
+            <GroupBox>
+                <GroupBox.Header>
+                    Log
+                </GroupBox.Header>
+                <RichTextBox x:Name="Log_RichTextBox"></RichTextBox>
+            </GroupBox>
+        </DockPanel>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="9*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <DataGrid CanUserAddRows="False" Grid.Row="0" x:Name="Token_DataGrid">
+
+            </DataGrid>
+            <StackPanel Grid.Row="1" Orientation="Horizontal">
+                <Button Content="Save" Click="Button_Click_3"></Button>
+            </StackPanel>
+        </Grid>
 
     </Grid>
 </Window>
