@@ -41,7 +41,7 @@
                 <GroupBox.Header>
                     Log
                 </GroupBox.Header>
-                <RichTextBox x:Name="Log_RichTextBox"></RichTextBox>
+                <RichTextBox x:Name="Log_RichTextBox" TextChanged="Log_RichTextBox_TextChanged"></RichTextBox>
             </GroupBox>
         </DockPanel>
         <Grid Grid.Column="1">

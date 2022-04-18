@@ -55,6 +55,7 @@ namespace AutoBroswer
 
             Thread new_thread = new Thread(new ThreadStart(() =>
             {
+                windows.Clear();
                 try
                 {
                     ChromeOptions chromeOptions = new ChromeOptions();
@@ -206,9 +207,14 @@ namespace AutoBroswer
 
                     ClickAI:
                         Thread.Sleep(3000);
+                        var clickCount = 0;
                         while (true)
                         {
-
+                            if (clickCount == 10)
+                            {
+                                // Cho nó chạy lại từ đầu check slot 
+                                goto BeforeCheckSlot;
+                            }
                             ClickAction.ClickByPosition(windowHandle, 514, 461);
                             if (content_rl == "DF_5")
                             {
@@ -228,6 +234,7 @@ namespace AutoBroswer
                                 WriteLog(String.Format("Find: {0}", "image/1/rally_10_btn.png"));
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_10_btn.png", 2, 1000);
                             }
+                            clickCount++;
                             Thread.Sleep(waitTime);
                             if (isClicked)
                             {
@@ -259,15 +266,17 @@ namespace AutoBroswer
                             {
                                 WriteLog(String.Format("Find: {0}", "DF_5"));
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_slot.png", 10, 1000);
+                                Thread.Sleep(waitTime);
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_item.png", 10, 1000);
+                                Thread.Sleep(waitTime);
 
                             }
 
-                            Thread.Sleep(waitTime);
                             ClickAction.ClickByPosition(windowHandle, 510, 420);
 
                             if (content_rl == "DF_5")
                             {
+                                Thread.Sleep(waitTime);
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/silo_ok.png", 10, 1000);
 
                             }
@@ -468,6 +477,12 @@ namespace AutoBroswer
                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
             }
             AutoControl.SendText(windowHandle, item.Name);
+        }
+
+        private void Log_RichTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // scroll it automatically
+            Log_RichTextBox.ScrollToEnd();
         }
     }
 }
