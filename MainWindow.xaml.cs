@@ -191,6 +191,7 @@ namespace AutoBroswer
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/search_btn.png", 10, 1000);
                         Thread.Sleep(waitTime);
 
+
                         if (content_rl == "DF_5")
                         {
                             WriteLog(String.Format("Find: {0}", "image/1/df_checked.png"));
@@ -200,13 +201,40 @@ namespace AutoBroswer
                         {
                             WriteLog(String.Format("Find: {0}", "image/1/rally_checked.png"));
                             isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/rally_checked.png", "image/1/rally_unckeck.png", 10, 1000);
+                            Thread.Sleep(waitTime / 2);
+                            int countClick = 0;
+                            while (true)
+                            {
+                                int lv = CheckLevelRally(windowHandle);
+                                countClick++;
+                                if (lv == item.Level)
+                                {
+                                    break;
+                                }
+                                ClickAction.ClickByImage(windowHandle, "image/1/plus_btn.png", 10, 1000);
+                                if (countClick >= 3)
+                                {
+                                    ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                                    break;
+
+                                }
+                                Thread.Sleep(waitTime / 2);
+                            }
+
+
                         }
-                        Thread.Sleep(waitTime);
+                        Thread.Sleep(waitTime/2);
+                    ClickRally:
                         WriteLog(String.Format("Find: {0}", "image/1/rally_search.png"));
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
+                        Thread.Sleep(2000);
+                        if (FindAction.FindByImageNorImage(windowHandle, "image/1/rally_search.png", "image/1/map_icon_btn.png", 10, 1000))
+                        {
+                            ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                            goto ClickRally;
+                        }
 
                     ClickAI:
-                        Thread.Sleep(3000);
                         var clickCount = 0;
                         while (true)
                         {
@@ -301,6 +329,15 @@ namespace AutoBroswer
                 }
             }));
             new_thread.Start();
+        }
+
+        private int CheckLevelRally(IntPtr windowHandle)
+        {
+            List<string> listPathRallyLevel = new List<string>();
+            listPathRallyLevel.Add("image/1/rally_level/10.png");
+            listPathRallyLevel.Add("image/1/rally_level/20.png");
+            listPathRallyLevel.Add("image/1/rally_level/30.png");
+            return FindAction.CheckExistByListImage(windowHandle, listPathRallyLevel, 10, 1000);
         }
 
         private void SetTokenRunning(Token item)
@@ -483,6 +520,11 @@ namespace AutoBroswer
         {
             // scroll it automatically
             Log_RichTextBox.ScrollToEnd();
+        }
+
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            Environment.Exit(0);
         }
     }
 }
