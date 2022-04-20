@@ -223,7 +223,7 @@ namespace AutoBroswer
 
 
                         }
-                        Thread.Sleep(waitTime/2);
+                        Thread.Sleep(waitTime / 2);
                     ClickRally:
                         WriteLog(String.Format("Find: {0}", "image/1/rally_search.png"));
                         isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_search.png", 10, 1000);
@@ -309,6 +309,7 @@ namespace AutoBroswer
 
                             }
                             WriteLog(String.Format("Find: {0}", "Completed Rally"));
+                            Thread.Sleep(waitTime);
                             goto BeforeCheckSlot;
                         }
                         else
