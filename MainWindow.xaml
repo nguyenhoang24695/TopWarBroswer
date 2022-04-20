@@ -34,7 +34,10 @@
                     <Button  Content="Hammer Rally" HorizontalAlignment="Left" Click="Button_Click"/>
                     <Button  Content="DF_5" HorizontalAlignment="Left" Click="Button_Click"/>
                     <Button  Content="SOS" HorizontalAlignment="Left" Click="Button_Click"/>
-                    
+                    <Button  Content="DF_25" HorizontalAlignment="Left" Click="Button_Click"/>                    
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <CheckBox Content="run only one" x:Name="RunOne_checkbox"/>
                 </StackPanel>
             </Grid>
             <GroupBox>
