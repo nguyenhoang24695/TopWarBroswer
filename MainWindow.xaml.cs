@@ -129,10 +129,12 @@ namespace AutoBroswer
 
                         //loai rally
                         string content_rl = string.Empty;
+                        bool is_only_one = false;
                         string team_rl = item.Slot.ToString();
                         this.Dispatcher.Invoke(new System.Action(() =>
                         {
                             content_rl = ((Button)sender).Content.ToString();
+                            is_only_one = RunOne_checkbox.IsChecked.HasValue ? RunOne_checkbox.IsChecked.Value : false;
                             //team_rl = Team_Textbox.Text;
                         }));
 
@@ -166,7 +168,7 @@ namespace AutoBroswer
 
                         if (!isSlotAvailable)
                         {
-                            if (content_rl == "Hammer Rally")
+                            if (content_rl == "Hammer Rally" && !is_only_one)
                             {
                                 WriteLog("Rally full, dang nhap token tiep theo");
                                 tokenBag.Enqueue(item);
@@ -192,7 +194,7 @@ namespace AutoBroswer
                         Thread.Sleep(waitTime);
 
 
-                        if (content_rl == "DF_5")
+                        if (content_rl == "DF_5" || content_rl == "DF_25")
                         {
                             WriteLog(String.Format("Find: {0}", "image/1/df_checked.png"));
                             isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/df_checked.png", "image/1/df_unchecked.png", 10, 1000);
@@ -238,7 +240,7 @@ namespace AutoBroswer
                         var clickCount = 0;
                         while (true)
                         {
-                            if (clickCount == 10)
+                            if (clickCount == 5)
                             {
                                 // Cho nó chạy lại từ đầu check slot 
                                 goto BeforeCheckSlot;
@@ -253,8 +255,14 @@ namespace AutoBroswer
                             else if (content_rl == "SOS")
                             {
 
-                                WriteLog(String.Format("Find: {0}", "image/1/rally_5_btn.png"));
+                                WriteLog(String.Format("Find: {0}", "image/1/rally_5_btn1.png"));
                                 isClicked = ClickAction.ClickByImage(windowHandle, "image/1/rally_5_btn1.png", 2, 1000);
+                            }
+                            else if (content_rl == "DF_25")
+                            {
+
+                                WriteLog(String.Format("Find: {0}", "image/1/atk_25_btn.png"));
+                                isClicked = ClickAction.ClickByImage(windowHandle, "image/1/atk_25_btn.png", 2, 1000);
                             }
                             else
                             {
@@ -281,6 +289,10 @@ namespace AutoBroswer
                                 case 1:
                                     WriteLog(String.Format("Find: {0}", "image/1/team_1.png"));
                                     isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_1.png", 10, 1000);
+                                    break;
+                                case 3:
+                                    WriteLog(String.Format("Find: {0}", "image/1/team_3.png"));
+                                    isClicked = ClickAction.ClickByImage(windowHandle, "image/1/team_3.png", 10, 1000);
                                     break;
                                 default:
                                     WriteLog(String.Format("Find: {0}", "image/1/team_quick.png"));
