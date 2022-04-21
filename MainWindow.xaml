@@ -36,8 +36,18 @@
                     <Button  Content="SOS" HorizontalAlignment="Left" Click="Button_Click"/>
                     <Button  Content="DF_25" HorizontalAlignment="Left" Click="Button_Click"/>                    
                 </StackPanel>
-                <StackPanel Grid.Column="2">
+                <StackPanel Grid.Column="2" Orientation="Vertical">
                     <CheckBox Content="run only one" x:Name="RunOne_checkbox"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <RadioButton Grid.Column="0" Content="0" IsChecked="True" GroupName="UseVit" Checked="RadioButton_Checked"/>
+                        <RadioButton Grid.Column="1" Content="10" GroupName="UseVit" Checked="RadioButton_Checked"/>
+                        <RadioButton Grid.Column="2" Content="50" GroupName="UseVit" Checked="RadioButton_Checked"/>
+                    </Grid>
                 </StackPanel>
             </Grid>
             <GroupBox>

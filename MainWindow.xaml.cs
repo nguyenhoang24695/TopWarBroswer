@@ -39,6 +39,7 @@ namespace AutoBroswer
         List<ChromeDriver> chromeDrivers = new List<ChromeDriver>();
         List<Token> currentListToken = new List<Token>();
         int count = 0;
+        int useVit = 0;
         string currentPath = string.Empty;
         public MainWindow()
         {
@@ -157,10 +158,17 @@ namespace AutoBroswer
                                 "image/1/rally_slot/2/0.png",
                                 "image/1/rally_slot/2/1.png"
                             }.ToArray(),
-                                        "image/1/rally_slot/1/f.png", 2, 1000);
+                                        "image/1/rally_slot/1/f.png", 4, 1000);
                                 break;
                             case 4:
-                                isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                                //isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                                isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
+                                "image/1/rally_slot/4/0.png",
+                                "image/1/rally_slot/4/1.png",
+                                "image/1/rally_slot/4/2.png",
+                                "image/1/rally_slot/4/3.png"
+                            }.ToArray(),
+                                        "image/1/rally_slot/4/4.png", 4, 1000);
                                 break;
                             default:
                                 break;
@@ -174,6 +182,7 @@ namespace AutoBroswer
                                 tokenBag.Enqueue(item);
                                 continue;
                             }
+                            Thread.Sleep(waitTime * 5);
                             goto BeforeCheckSlot;
                         }
                         //
@@ -326,12 +335,53 @@ namespace AutoBroswer
                         }
                         else
                         {
-                            if (++currentCount == totalToken)
+                            WriteLog(String.Format("Find: {0}", "image/1/image/1/vit_table.png"));
+                            foundPoint = FindAction.FindByImage(windowHandle, "image/1/vit_table.png", 2, 1000);
+                            if (foundPoint.HasValue)
                             {
-                                break;
+                                WriteLog(String.Format("Het The Luc"));
+                                switch (useVit)
+                                {
+                                    case 10:
+                                        ClickAction.ClickByImage(windowHandle, "image/1/vit_10.png");
+                                        Thread.Sleep(waitTime/2);
+                                        for(int i = 0; i < 5; i++)
+                                        {
+                                            ClickAction.ClickByImage(windowHandle, "image/1/vit_use.png");
+                                            Thread.Sleep(waitTime / 2);
+                                        }
+                                        break;
+                                    case 50:
+                                        ClickAction.ClickByImage(windowHandle, "image/1/vit_50.png");
+                                        Thread.Sleep(waitTime/2);
+                                        ClickAction.ClickByImage(windowHandle, "image/1/vit_use.png");
+                                        Thread.Sleep(waitTime / 2);
+                                        break;
+                                    default:
+                                        if (++currentCount == totalToken)
+                                        {
+                                            goto LoopEnd;
+                                        }
+                                        break;
+
+                                }
+                                ClickAction.ClickByImage(windowHandle, "image/1/vit_out_btn.png");
+                                if (content_rl == "DF_25")
+                                {
+                                    goto ClickAI;
+                                }
+
+                            }
+                            else
+                            {
+                                if (++currentCount == totalToken)
+                                {
+                                    goto LoopEnd;
+                                }
                             }
                         }
                     }
+                LoopEnd:
                     KAutoHelper.FindWindow.GetWindowThreadProcessId(windowHandle, out int pId);
                     Process.GetProcessById(pId).Kill();
                     WriteLog("Finished");
@@ -538,6 +588,11 @@ namespace AutoBroswer
         private void Window_Closed(object sender, EventArgs e)
         {
             Environment.Exit(0);
+        }
+
+        private void RadioButton_Checked(object sender, RoutedEventArgs e)
+        {
+            useVit = int.Parse(((RadioButton)sender).Content.ToString());
         }
     }
 }
