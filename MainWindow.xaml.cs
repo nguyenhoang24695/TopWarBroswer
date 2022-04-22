@@ -222,14 +222,23 @@ namespace AutoBroswer
                                 {
                                     break;
                                 }
-                                ClickAction.ClickByImage(windowHandle, "image/1/plus_btn.png", 10, 1000);
+                                if(lv == 0)
+                                {
+                                    ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                                    Thread.Sleep(waitTime/2);
+                                }
+                                else
+                                {
+                                    ClickAction.ClickByImage(windowHandle, "image/1/plus_btn.png", 10, 1000);
+                                }
                                 if (countClick >= 3)
                                 {
                                     ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                                    Thread.Sleep(waitTime/2);
                                     break;
 
                                 }
-                                Thread.Sleep(waitTime / 2);
+                                Thread.Sleep(waitTime);
                             }
 
 
