@@ -409,7 +409,7 @@ namespace AutoBroswer
             listPathRallyLevel.Add("image/1/rally_level/10.png");
             listPathRallyLevel.Add("image/1/rally_level/20.png");
             listPathRallyLevel.Add("image/1/rally_level/30.png");
-            return FindAction.CheckExistByListImage(windowHandle, listPathRallyLevel, 10, 1000);
+            return FindAction.CheckExistByListImage(windowHandle, listPathRallyLevel, 3, 1000);
         }
 
         private void SetTokenRunning(Token item)
