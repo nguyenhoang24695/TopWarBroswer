@@ -120,7 +120,7 @@ namespace AutoBroswer
                         bool isClicked = false;
                         while (!isClicked)
                         {
-                            isClicked = ClickAction.ClickByImage(windowHandle, "image/1/x.png", 20, 1000);
+                            isClicked = ClickAction.ClickByImageOrImage(windowHandle, "image/1/x.png", "image/1/back.png", 20, 1000);
                         }
                         AutoControl.SendText(windowHandle, item.Name);
 
@@ -222,14 +222,23 @@ namespace AutoBroswer
                                 {
                                     break;
                                 }
-                                ClickAction.ClickByImage(windowHandle, "image/1/plus_btn.png", 10, 1000);
+                                if (lv == 0)
+                                {
+                                    ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                                    Thread.Sleep(waitTime / 2);
+                                }
+                                else
+                                {
+                                    ClickAction.ClickByImage(windowHandle, "image/1/plus_btn.png", 10, 1000);
+                                }
                                 if (countClick >= 3)
                                 {
                                     ClickAction.ClickByImage(windowHandle, "image/1/minus_btn.png", 10, 1000);
+                                    Thread.Sleep(waitTime / 2);
                                     break;
 
                                 }
-                                Thread.Sleep(waitTime / 2);
+                                Thread.Sleep(waitTime);
                             }
 
 
@@ -344,8 +353,8 @@ namespace AutoBroswer
                                 {
                                     case 10:
                                         ClickAction.ClickByImage(windowHandle, "image/1/vit_10.png");
-                                        Thread.Sleep(waitTime/2);
-                                        for(int i = 0; i < 5; i++)
+                                        Thread.Sleep(waitTime / 2);
+                                        for (int i = 0; i < 5; i++)
                                         {
                                             ClickAction.ClickByImage(windowHandle, "image/1/vit_use.png");
                                             Thread.Sleep(waitTime / 2);
@@ -353,7 +362,7 @@ namespace AutoBroswer
                                         break;
                                     case 50:
                                         ClickAction.ClickByImage(windowHandle, "image/1/vit_50.png");
-                                        Thread.Sleep(waitTime/2);
+                                        Thread.Sleep(waitTime / 2);
                                         ClickAction.ClickByImage(windowHandle, "image/1/vit_use.png");
                                         Thread.Sleep(waitTime / 2);
                                         break;
@@ -400,7 +409,7 @@ namespace AutoBroswer
             listPathRallyLevel.Add("image/1/rally_level/10.png");
             listPathRallyLevel.Add("image/1/rally_level/20.png");
             listPathRallyLevel.Add("image/1/rally_level/30.png");
-            return FindAction.CheckExistByListImage(windowHandle, listPathRallyLevel, 10, 1000);
+            return FindAction.CheckExistByListImage(windowHandle, listPathRallyLevel, 3, 1000);
         }
 
         private void SetTokenRunning(Token item)
