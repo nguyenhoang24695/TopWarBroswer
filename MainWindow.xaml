@@ -38,6 +38,7 @@
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Vertical">
                     <CheckBox Content="run only one" x:Name="RunOne_checkbox"/>
+                    <CheckBox Content="EL Mode" x:Name="ElMode_checkbox"/>
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

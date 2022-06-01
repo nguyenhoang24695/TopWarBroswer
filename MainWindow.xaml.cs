@@ -131,11 +131,13 @@ namespace AutoBroswer
                         //loai rally
                         string content_rl = string.Empty;
                         bool is_only_one = false;
+                        bool el_mode = false;
                         string team_rl = item.Slot.ToString();
                         this.Dispatcher.Invoke(new System.Action(() =>
                         {
                             content_rl = ((Button)sender).Content.ToString();
                             is_only_one = RunOne_checkbox.IsChecked.HasValue ? RunOne_checkbox.IsChecked.Value : false;
+                            el_mode = ElMode_checkbox.IsChecked.HasValue ? ElMode_checkbox.IsChecked.Value : false;
                             //team_rl = Team_Textbox.Text;
                         }));
 
@@ -169,6 +171,24 @@ namespace AutoBroswer
                                 "image/1/rally_slot/4/3.png"
                             }.ToArray(),
                                         "image/1/rally_slot/4/4.png", 4, 1000);
+                                break;
+                            case 5:
+                                //isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                                isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
+                                //"image/1/rally_slot/5/0.png",
+                                //"image/1/rally_slot/5/1.png",
+                                //"image/1/rally_slot/5/2.png",
+                                //"image/1/rally_slot/5/3.png",
+                                "image/1/rally_slot/5/4.png"
+                            }.ToArray(),
+                                        "image/1/rally_slot/5/f.png", 4, 1000);
+                                break;
+                            case 6:
+                                //isSlotAvailable = FindAction.FindByImageNorImage(windowHandle, "image/1/rally_slot/4/3.png", "image/1/rally_slot/4/4.png", 4, 1000);
+                                isSlotAvailable = FindAction.FindByImageListNorImage(windowHandle, new List<string>(){
+                                "image/1/rally_slot/6/5.png"
+                            }.ToArray(),
+                                        "image/1/rally_slot/6/f.png", 4, 1000);
                                 break;
                             default:
                                 break;
@@ -263,7 +283,15 @@ namespace AutoBroswer
                                 // Cho nó chạy lại từ đầu check slot 
                                 goto BeforeCheckSlot;
                             }
-                            ClickAction.ClickByPosition(windowHandle, 514, 461);
+                            if (el_mode)
+                            {
+
+                                ClickAction.ClickByPosition(windowHandle, 505, 458);
+                            }
+                            else
+                            {
+                                ClickAction.ClickByPosition(windowHandle, 514, 461);
+                            }
                             if (content_rl == "DF_5")
                             {
 
@@ -375,7 +403,7 @@ namespace AutoBroswer
 
                                 }
                                 ClickAction.ClickByImage(windowHandle, "image/1/vit_out_btn.png");
-                                if (content_rl == "DF_25")
+                                if (content_rl == "DF_25" || content_rl == "Hammer Rally")
                                 {
                                     goto ClickAI;
                                 }
